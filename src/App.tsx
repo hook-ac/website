@@ -7,9 +7,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Route, Routes, useNavigate } from "react-router-dom";
+import { Profile } from "./Profile";
 
 function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/profile" element={<Profile />} />
+    </Routes>
+  );
+}
+
+export function Landing() {
   const [forceOpenTooltip, setForceOpenTooltip] = useState(false);
+  const navigate = useNavigate();
   return (
     <div className="w-[100vw] h-[100vh] flex flex-col justify-center items-center gap-10 invert-0">
       <Logo />
@@ -42,8 +54,8 @@ function App() {
                 <Button
                   className="w-36"
                   variant="outline"
-                  onClick={() => {
-                    setForceOpenTooltip(true);
+                  onClick={async () => {
+                    navigate("/profile");
                   }}
                 >
                   Profile
