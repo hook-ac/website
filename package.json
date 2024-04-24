@@ -8,15 +8,20 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "sync":"npx supabase gen types typescript --project-id \"bogjwtpfbwbchxteoxlo\" --schema public > src/supabase.ts"
+    "sync": "npx supabase gen types typescript --project-id \"bogjwtpfbwbchxteoxlo\" --schema public > src/supabase.ts"
   },
   "dependencies": {
+    "@radix-ui/react-slider": "^1.1.2",
     "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-switch": "^1.0.3",
+    "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@supabase/supabase-js": "^2.42.5",
+    "@types/lodash": "^4.17.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "framer-motion": "^11.1.7",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.372.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
