@@ -16,6 +16,7 @@ export const profile = create(() => ({
   userSettings: null as
     | Database["public"]["Tables"]["userSettings"]["Insert"][]
     | null,
+  lUpdate: Date.now(),
 }));
 
 supabase.auth.onAuthStateChange(async (state) => {
@@ -28,31 +29,56 @@ supabase.auth.onAuthStateChange(async (state) => {
   if (state != "INITIAL_SESSION") return;
 
   const user = await supabase.auth.getUser();
-  let { data: features } = await supabase.from("features").select("*");
 
+  // Retrieve features and user settings
+  let { data: features } = await supabase.from("features").select("*");
   let { data: userSettings } = await supabase.from("userSettings").select("*");
 
-  profile.setState(() => ({
+  if (user.data.user) {
+    // Cast to Insert data type
+    let settings =
+      userSettings![0] as any as Database["public"]["Tables"]["userSettings"]["Insert"];
+
+    if (!settings) {
+      // Define a settings row
+      settings = {
+        user: user.data.user.id,
+        definition: {
+          init: Date.now(),
+        },
+      };
+
+      // Insert and retrieve back the newly created row.
+      await supabase.from("userSettings").upsert(settings);
+      let { data: newSettings } = await supabase
+        .from("userSettings")
+        .select("*");
+
+      profile.setState({
+        userSettings: newSettings,
+      });
+    }
+
+    // Subscribe for config changes
+    profile.subscribe(async (profile, prefProfile) => {
+      if (!profile.userSettings) return;
+      if (!isEqual(profile.lUpdate, prefProfile.lUpdate)) {
+        for (const setting of profile.userSettings) {
+          await supabase.from("userSettings").upsert(setting);
+        }
+      }
+      return profile;
+    });
+  }
+
+  // Create profile state, reuse userSettings if they were created.
+  profile.setState((prev) => ({
     loading: false,
     user: user.data.user,
     features,
-    userSettings,
+    userSettings: prev.userSettings ? prev.userSettings : userSettings,
+    lUpdate: Date.now(),
   }));
-
-  profile.subscribe(async (profile, prefProfile) => {
-    if (!profile.userSettings) return;
-
-    if (!isEqual(profile.userSettings, prefProfile.userSettings)) {
-      console.log("not equals");
-      for (const setting of profile.userSettings) {
-        console.log(setting);
-        let data = await supabase.from("userSettings").upsert(setting);
-        console.log(data.error);
-        console.log("upserted");
-      }
-    }
-    return profile;
-  });
 });
 
 export function Profile() {
@@ -103,8 +129,30 @@ export function Profile() {
 }
 
 export function Settings() {
-  const { features } = profile();
+  const { features, userSettings } = profile();
+  function updateField(fieldName: string, state: any) {
+    let settings = userSettings![0];
+    settings.definition = {
+      ...(settings.definition as any),
+      [fieldName]: state,
+    };
+    profile.setState({
+      userSettings: [settings],
+      lUpdate: Date.now(),
+    });
+  }
 
+  function getConfigValue(fieldName: string, defaultValue: any) {
+    if (userSettings![0] === undefined) {
+      updateField(fieldName, defaultValue);
+      return defaultValue;
+    }
+    if ((userSettings![0].definition as any)[fieldName] === undefined) {
+      updateField(fieldName, defaultValue);
+      return defaultValue;
+    }
+    return (userSettings![0].definition as any)[fieldName];
+  }
   return (
     <Tabs defaultValue={(2).toString()} className="w-full">
       <TabsList className="w-full justify-start bg-transparent">
@@ -133,7 +181,15 @@ export function Settings() {
                   return (
                     <Card className="flex p-2 px-4 text-sm justify-between items-center">
                       {field.name}
-                      <Switch onCheckedChange={() => {}}></Switch>
+                      <Switch
+                        checked={getConfigValue(
+                          `${feature.name}:${field.name}`,
+                          field.value
+                        )}
+                        onCheckedChange={(state) => {
+                          updateField(`${feature.name}:${field.name}`, state);
+                        }}
+                      ></Switch>
                     </Card>
                   );
                 }
@@ -143,9 +199,16 @@ export function Settings() {
                     <Card className="flex p-2 px-4 text-sm justify-between items-center">
                       {field.name}
                       <Slider
-                        defaultValue={[33]}
-                        max={100}
+                        defaultValue={[field.value]}
+                        max={Number(field.max)}
                         step={1}
+                        min={Number(field.min)}
+                        onValueCommit={(value) => {
+                          updateField(
+                            `${feature.name}:${field.name}`,
+                            value[0]
+                          );
+                        }}
                         className="w-64"
                       />
                     </Card>
