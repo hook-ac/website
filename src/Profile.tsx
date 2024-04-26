@@ -2,15 +2,8 @@ import { User } from "@supabase/supabase-js";
 import { create } from "zustand";
 import { supabase } from "./state";
 import { Button } from "./components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
-import { useEffect } from "react";
 import { Database } from "./supabase";
 import { isEqual } from "lodash";
 import { FeatureDefinition } from "./types";
@@ -35,11 +28,9 @@ supabase.auth.onAuthStateChange(async (state) => {
   if (state != "INITIAL_SESSION") return;
 
   const user = await supabase.auth.getUser();
-  let { data: features, error } = await supabase.from("features").select("*");
+  let { data: features } = await supabase.from("features").select("*");
 
-  let { data: userSettings, error: userSettingsError } = await supabase
-    .from("userSettings")
-    .select("*");
+  let { data: userSettings } = await supabase.from("userSettings").select("*");
 
   profile.setState(() => ({
     loading: false,
@@ -112,17 +103,17 @@ export function Profile() {
 }
 
 export function Settings() {
-  const { features, userSettings } = profile();
+  const { features } = profile();
 
   return (
-    <Tabs defaultValue={2} className="w-full">
+    <Tabs defaultValue={(2).toString()} className="w-full">
       <TabsList className="w-full justify-start bg-transparent">
         {features
           ?.sort((a, b) => b.priority! - a.priority!)
           .map((feature) => {
             return (
               <TabsTrigger
-                value={feature.id}
+                value={feature.id!.toString()}
                 className="data-[state=active]:bg-muted rounded-full"
               >
                 {feature.name}
@@ -133,7 +124,7 @@ export function Settings() {
 
       {features?.map((feature) => {
         return (
-          <TabsContent value={feature.id}>
+          <TabsContent value={feature.id!.toString()}>
             <div className="flex flex-col gap-2">
               {(
                 feature.defaultDefinition as any as FeatureDefinition
