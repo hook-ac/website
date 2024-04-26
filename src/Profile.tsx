@@ -110,18 +110,29 @@ export function Profile() {
 
   return (
     <div className="w-[100vw] max-w-[800px] h-[100vh] flex flex-col items-center py-24 m-auto px-4 gap-4">
-      <div className="w-full flex gap-4 p-4 border-b-2">
-        <img
-          src={user.user_metadata.avatar_url}
-          width={48}
-          className="rounded-full"
-        ></img>
-        <div>
-          <CardTitle>{user.user_metadata.full_name}</CardTitle>
-          <CardDescription>
-            User since {new Date(user.created_at).toUTCString()}
-          </CardDescription>
+      <div className="w-full flex gap-4 p-4 border-b-2 items-center justify-between">
+        <div className="flex gap-4">
+          <img
+            src={user.user_metadata.avatar_url}
+            width={48}
+            className="rounded-full"
+          ></img>
+          <div>
+            <CardTitle>{user.user_metadata.full_name}</CardTitle>
+            <CardDescription>
+              User since {new Date(user.created_at).toUTCString()}
+            </CardDescription>
+          </div>
         </div>
+
+        <Button
+          variant={"outline"}
+          onClick={() => {
+            supabase.auth.signOut();
+          }}
+        >
+          Logout
+        </Button>
       </div>
       <Settings />
     </div>
