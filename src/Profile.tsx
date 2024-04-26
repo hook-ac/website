@@ -211,9 +211,14 @@ export function Settings() {
                       </div>
 
                       <Slider
-                        defaultValue={[field.value]}
+                        defaultValue={[
+                          getConfigValue(
+                            `${feature.name}:${field.name}`,
+                            field.value
+                          ),
+                        ]}
                         max={Number(field.max)}
-                        step={1}
+                        step={field.float ? 0.1 : 1}
                         min={Number(field.min)}
                         onValueCommit={(value) => {
                           updateField(
