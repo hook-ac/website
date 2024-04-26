@@ -181,7 +181,12 @@ export function Settings() {
                 if (field.type == "boolean") {
                   return (
                     <Card className="flex p-2 px-4 text-sm justify-between items-center">
-                      {field.name}
+                      <div className="flex flex-col">
+                        <div>{field.name}</div>
+                        <div className="opacity-50 max-w-96">
+                          {field.description}
+                        </div>
+                      </div>
                       <Switch
                         checked={getConfigValue(
                           `${feature.name}:${field.name}`,
@@ -198,7 +203,13 @@ export function Settings() {
                 if (field.type == "number") {
                   return (
                     <Card className="flex p-2 px-4 text-sm justify-between items-center">
-                      {field.name}
+                      <div className="flex flex-col">
+                        <div>{field.name}</div>
+                        <div className="opacity-50 max-w-96">
+                          {field.description}
+                        </div>
+                      </div>
+
                       <Slider
                         defaultValue={[field.value]}
                         max={Number(field.max)}
