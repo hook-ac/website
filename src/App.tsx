@@ -48,24 +48,24 @@ export function Landing() {
           >
             Editor
           </Button>
-          <TooltipProvider>
-            <Tooltip open={forceOpenTooltip} onOpenChange={setForceOpenTooltip}>
-              <TooltipTrigger>
-                <Button
-                  className="w-36"
-                  variant="outline"
-                  onClick={async () => {
-                    navigate("/profile");
-                  }}
-                >
-                  Profile
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Profiles are still not implemented</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Button
+            onClick={() => {
+              location.href = "https://github.com/hook-ac";
+            }}
+            className="w-36"
+            variant="outline"
+          >
+            Github
+          </Button>
+          <Button
+            className="w-36"
+            variant="outline"
+            onClick={async () => {
+              navigate("/profile");
+            }}
+          >
+            Profile
+          </Button>
         </div>
       </div>
     </div>
